@@ -385,8 +385,8 @@ def get_product_information(user_question, categories='*', top_k=1):
 def chat_complete(messages, functions, function_call='auto'):
     """  Return assistant chat response based on user query. Assumes existing list of messages """
     
-    url = f"{AOAI_endpoint}/openai/deployments/{chat_deployment}/chat/completions?api-version={AOAI_api_version}"
-
+    url = f"{AOAI_endpoint}/openai/deployments/{chat_deployment}/completions?api-version={AOAI_api_version}"
+    logging.info(url)
     headers = {
         "Content-Type": "application/json",
         "api-key": AOAI_key
