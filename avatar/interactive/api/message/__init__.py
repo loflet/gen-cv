@@ -224,16 +224,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "content": str(function_response),
         })
      
-        logger.critical("-----------------PRINTING THE RESPONSE FROM 404 ---------------")
-        logger.critical(messages)
-        logger.critical("-----------------PRINTING COMPLETE 404---------------")
-
         response = chat_complete(messages, tools= tools, tool_choice= "none")
-        
-
-        logger.debug("-----------------PRINTING THE RESPONSE FROM 505 ---------------")
-        logger.debug(response)
-        logger.debug("-----------------PRINTING COMPLETE 505---------------")
         response_message = response["choices"][0]["message"]
 
     messages.append({'role' : response_message['role'], 'content' : response_message['content']})
@@ -296,9 +287,7 @@ def get_bonus_points(account_id):
         "available_bonus_points": loyalty_points,
         "cash_value": cash_value
     })
-    logger.debug("-----------------PRINTING THE RESPONSE FROM 303 ---------------")
-    logger.debug(response_json)
-    logger.debug("-----------------PRINTING COMPLETE 303---------------")
+
     return response_json
 
 
@@ -461,9 +450,8 @@ def get_product_information(user_question, categories='*', top_k=1):
 def chat_complete(messages, tools, tool_choice='auto'):
     """  Return assistant chat response based on user query. Assumes existing list of messages """
     
-    #url = f"{AOAI_endpoint}/openai/deployments/{chat_deployment}/chat/completions?api-version={AOAI_api_version}"
-    #url = f"{AOAI_endpoint}/openai/deployments/{chat_deployment}/chat/completions?api-version=2023-07-01-preview"
-    url =  f"{AOAI_endpoint}/openai/deployments/gpt-4o/chat/completions?api-version=2023-07-01-preview"
+    url = f"{AOAI_endpoint}/openai/deployments/{chat_deployment}/chat/completions?api-version={AOAI_api_version}"
+    
     logging.info(url)
     headers = {
         "Content-Type": "application/json",
@@ -488,7 +476,4 @@ def chat_complete(messages, tools, tool_choice='auto'):
     logging.info(data)
     response = requests.post(url, headers=headers, data=json.dumps(data)).json()
 
-    logger.info("-----------------PRINTING THE RESPONSE FROM chat_complete ---------------")
-    logger.info(response)
-    logger.info("-----------------PRINTING COMPLETE---------------")
     return response
