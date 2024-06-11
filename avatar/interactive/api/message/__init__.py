@@ -25,7 +25,8 @@ sql_db_name = os.getenv("SQL_DB_NAME")
 
 blob_sas_url = os.getenv("BLOB_SAS_URL")
 
-server_connection_string = f"Driver={{ODBC Driver 17 for SQL Server}};Server=tcp:{sql_db_server},1433;Uid={sql_db_user};Pwd={sql_db_password};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+#server_connection_string = f"Driver={{ODBC Driver 17 for SQL Server}};Server=tcp:{sql_db_server},1433;Uid={sql_db_user};Pwd={sql_db_password};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+server_connection_string = f"Driver={{ODBC Driver 18 for SQL Server}};Server={sql_db_server};Uid={sql_db_user};Pwd={sql_db_password};"
 database_connection_string = server_connection_string + f"Database={sql_db_name};"
 
 # font color adjustments
@@ -33,79 +34,130 @@ blue, end_blue = '\033[36m', '\033[0m'
 
 place_orders = False
 
-functions = [
+tools = [
     {
-        "name": "get_bonus_points",
-        "description": "Check the amount of customer bonus / loyalty points",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "account_id": {
-                    "type": "number",
-                    "description": "Four digit account number (i.e., 1005, 2345, etc.)"
+        "type": "function",
+        "function": {
+            "name": "get_bonus_points",
+            "description": "Check the amount of customer bonus / loyalty points",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "type": "number",
+                        "description": "Four digit account number (i.e., 1005, 2345, etc.)"
+                    },
                 },
-            },
-            "required": ["account_id"],
+                "required": ["account_id"],
+            }
         }
     },
     {
-        "name": "get_order_details",
-        "description": "Check customer account for expected delivery date of existing orders based on the provided parameters",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "account_id": {
-                    "type": "number",
-                    "description": "Four digit account number (i.e., 1005, 2345, etc.)"
+        "type": "function",
+        "function": {
+            "name": "get_order_details",
+            "description": "Check customer account for expected delivery date of existing orders based on the provided parameters",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "type": "number",
+                        "description": "Four digit account number (i.e., 1005, 2345, etc.)"
+                    },
                 },
-            },
-            "required": ["account_id"],
+                "required": ["account_id"],
+            }
         }
     },
     {
-        "name": "order_product",
-        "description": "Order a product based on the provided parameters",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "account_id": {
-                    "type": "number",
-                    "description": "Four digit account number (i.e., 1005, 2345, etc.)"
+        "type": "function",
+        "function": {
+            "name": "order_product",
+            "description": "Order a product based on the provided parameters",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "type": "number",
+                        "description": "Four digit account number (i.e., 1005, 2345, etc.)"
+                    },
+                    "product_name": {
+                        "type": "string",
+                        "description": "Name of the product to order (i.e., Elysian Voyager, Terra Roamer, AceMaster 3000, Server & Style)"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "description": "Quantity of the product to order (i.e., 1, 2, etc.)"
+                    }
                 },
-                "product_name": {
-                    "type": "string",
-                    "description": "Name of the product to order (i.e., Elysian Voyager, Terra Roamer, AceMaster 3000, Server & Style)"
-                },
-                "quantity": {
-                    "type": "number",
-                    "description": "Quantity of the product to order (i.e., 1, 2, etc.)"
-                }
-            },
-            "required": ["account_id", "product_name", "quantity"],
+                "required": ["account_id", "product_name", "quantity"],
+            }
         }
     },
-        {
-        "name": "get_product_information",
-        "description": "Find information about a product based on a user question. Use only if the requested information if not already available in the conversation context.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "user_question": {
-                    "type": "string",
-                    "description": "User question (i.e., do you have tennis shoes for men?, etc.)"
+    {
+        "type": "function",
+        "function": {
+            "name": "get_product_information",
+            "description": "Find information about a product based on a user question. Use only if the requested information if not already available in the conversation context.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "user_question": {
+                        "type": "string",
+                        "description": "User question (i.e., do you have tennis shoes for men?, etc.)"
+                    },
                 },
-            },
-            "required": ["user_question"],
+                "required": ["user_question"],
+            }
         }
     }
 ]
+
+class ColoredFormatter(logging.Formatter):
+    # Define your colors
+    COLORS = {
+        'DEBUG': '\033[94m',   # Blue
+        'INFO': '\033[92m',    # Green
+        'WARNING': '\033[93m', # Yellow
+        'ERROR': '\033[91m',   # Red
+        'CRITICAL': '\033[95m' # Magenta
+    }
+    RESET = '\033[0m'  # Reset color
+
+    def format(self, record):
+        log_color = self.COLORS.get(record.levelname, self.RESET)
+        message = super().format(record)
+        return f"{log_color}{message}{self.RESET}"
+
+# Create a logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)  # Set the logging level
+
+# Create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+# Create a formatter and add it to the handler
+formatter = ColoredFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+
+# Add the handler to the logger
+logger.addHandler(ch)
+
+# Example log messages
+logger.debug("This is a debug message")
+logger.info("This is an info message")
+logger.warning("This is a warning message")
+logger.error("This is an error message")
+logger.critical("This is a critical message")
+
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     messages = json.loads(req.get_body())
 
-    response = chat_complete(messages, functions= functions, function_call= "auto")
+    response = chat_complete(messages, tools= tools, tool_choice= "auto")
 
     products = []
     
@@ -115,10 +167,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         logging.info(response)
 
     # if the model wants to call a function
-    if response_message.get("function_call"):
+    if response_message.get("tool_calls"):
         # Call the function. The JSON response may not always be valid so make sure to handle errors
-        function_name = response_message["function_call"]["name"]
+        function_name = response_message["tool_calls"][0]["function"]["name"]
 
+        logging.info("Printing the function Name: ")
+        logging.info(function_name)
+        logging.info("Printing COMPLETE ")
         available_functions = {
                 "get_bonus_points": get_bonus_points,
                 "get_order_details": get_order_details,
@@ -127,18 +182,23 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         }
         function_to_call = available_functions[function_name] 
 
-        function_args = json.loads(response_message["function_call"]["arguments"])
+        function_args = json.loads(response_message["tool_calls"][0]["function"]["arguments"])
+
         function_response = function_to_call(**function_args)
         # print(function_name, function_args)
 
         # Add the assistant response and function response to the messages
         messages.append({
             "role": response_message["role"],
-            "function_call": {
-                "name": function_name,
-                "arguments": response_message["function_call"]["arguments"],
-            },
-            "content": None
+            "tool_calls": [{
+                "id": response_message["tool_calls"][0]["id"],
+                "type": "function",
+                "function":{
+                    "name": function_name,
+                    "arguments": response_message["tool_calls"][0]["function"]["arguments"],
+                }
+            }],
+            "content": 'none'
         })
 
         if function_to_call == get_product_information:
@@ -152,14 +212,28 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             # return only product description to LLM to avoid chatting about prices and image files 
             function_response = product_info['description']
 
+        if function_to_call == get_bonus_points:
+            response_info = json.loads(function_response)
+                
+            # return only product description to LLM to avoid chatting about prices and image files 
+            function_response = response_info['available_bonus_points']
+
         messages.append({
-            "role": "function",
-            "name": function_name,
-            "content": function_response,
+            "role": "tool",
+            "tool_call_id": response_message["tool_calls"][0]["id"],
+            "content": str(function_response),
         })
      
-        response = chat_complete(messages, functions= functions, function_call= "none")
+        logger.critical("-----------------PRINTING THE RESPONSE FROM 404 ---------------")
+        logger.critical(messages)
+        logger.critical("-----------------PRINTING COMPLETE 404---------------")
+
+        response = chat_complete(messages, tools= tools, tool_choice= "none")
         
+
+        logger.debug("-----------------PRINTING THE RESPONSE FROM 505 ---------------")
+        logger.debug(response)
+        logger.debug("-----------------PRINTING COMPLETE 505---------------")
         response_message = response["choices"][0]["message"]
 
     messages.append({'role' : response_message['role'], 'content' : response_message['content']})
@@ -222,7 +296,9 @@ def get_bonus_points(account_id):
         "available_bonus_points": loyalty_points,
         "cash_value": cash_value
     })
-
+    logger.debug("-----------------PRINTING THE RESPONSE FROM 303 ---------------")
+    logger.debug(response_json)
+    logger.debug("-----------------PRINTING COMPLETE 303---------------")
     return response_json
 
 
@@ -382,23 +458,37 @@ def get_product_information(user_question, categories='*', top_k=1):
     }
     return json.dumps(response_data)
 
-def chat_complete(messages, functions, function_call='auto'):
+def chat_complete(messages, tools, tool_choice='auto'):
     """  Return assistant chat response based on user query. Assumes existing list of messages """
     
-    url = f"{AOAI_endpoint}/openai/deployments/{chat_deployment}/chat/completions?api-version={AOAI_api_version}"
+    #url = f"{AOAI_endpoint}/openai/deployments/{chat_deployment}/chat/completions?api-version={AOAI_api_version}"
+    #url = f"{AOAI_endpoint}/openai/deployments/{chat_deployment}/chat/completions?api-version=2023-07-01-preview"
+    url =  f"{AOAI_endpoint}/openai/deployments/gpt-4o/chat/completions?api-version=2023-07-01-preview"
     logging.info(url)
     headers = {
         "Content-Type": "application/json",
         "api-key": AOAI_key
     }
 
+    # data = {
+    #     "messages": messages,
+    #     #"tools": functions,
+    #     "functions": functions,
+    #     "function_call": function_call,
+    #     "temperature" : 0,
+    # }
+
     data = {
         "messages": messages,
-        #"functions": functions,
-        #"function_call": function_call,
-        "temperature" : 0,
+        "tools": tools,
+        "tool_choice": tool_choice,
+        "temperature" : 0.7,
     }
 
+    logging.info(data)
     response = requests.post(url, headers=headers, data=json.dumps(data)).json()
 
+    logger.info("-----------------PRINTING THE RESPONSE FROM chat_complete ---------------")
+    logger.info(response)
+    logger.info("-----------------PRINTING COMPLETE---------------")
     return response
