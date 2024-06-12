@@ -81,15 +81,16 @@
       <div class="loginCard">
         <div class="loginCard__header">Login</div>
 
-        <fluent-text-field appearance="outline" placeholder="user@email.com">Username</fluent-text-field>
-        <fluent-text-field appearance="outline" placeholder="****************">Password</fluent-text-field>
+        <fluent-text-field appearance="outline" placeholder="user@email.com" id="username" name="username">Username</fluent-text-field>
+        <fluent-text-field appearance="outline" placeholder="****************" id="password" name="password">Password</fluent-text-field>
 
-        <button id="playVideo" onclick="window.startSession()">
+        <button id="playVideo" onclick="authenticate()">
           <span id="playVideo__text" class="playVideo__text">Login</span>
         </button>
       </div>
     </div>
   </div>
+  <p id="result"></p>
 </body>
 
 </html>

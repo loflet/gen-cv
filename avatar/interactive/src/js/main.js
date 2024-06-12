@@ -10,6 +10,7 @@ var system_prompt = `You are an AI assistant focused on delivering brief product
 - Provide responses within 3 sentences, emphasizing conciseness and accuracy.
 - If not specified otherwise, the account_id of the current user is 1000
 - Pay attention to the language the customer is using in their latest statement and respond in the same language!
+- Only if the user refers to "Internet" then you are allowed to respond answers from internet.
 `
 
 const TTSVoice = "en-US-JennyMultilingualNeural" // Update this value if you want to use a different voice
@@ -205,6 +206,30 @@ window.startSession = () => {
       connectToAvatarService()
       setupWebRTC()
     })
+}
+
+async function authenticate() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const response = await fetch('/api/authenticationCheck', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username, password })
+  });
+
+  const result = await response.json();
+  const resultElement = document.getElementById('result');
+
+  if (response.status === 200 && result.status === 'success') {
+      resultElement.textContent = 'Authentication Successful!';
+      resultElement.style.color = 'green';
+      window.startSession()
+  } else {
+      resultElement.textContent = 'Authentication Failed!';
+      resultElement.style.color = 'red';
+  }
 }
 
 async function greeting() {
